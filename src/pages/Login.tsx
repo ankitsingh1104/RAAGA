@@ -25,7 +25,7 @@ const Login = () => {
     });
     
     setIsLoading(false);
-    navigate("/");
+    navigate("/dashboard");
   };
 
   return (
