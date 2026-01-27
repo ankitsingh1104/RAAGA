@@ -26,7 +26,7 @@ const Signup = () => {
     });
     
     setIsLoading(false);
-    navigate("/");
+    navigate("/dashboard");
   };
 
   return (
