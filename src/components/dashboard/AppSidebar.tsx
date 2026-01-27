@@ -29,7 +29,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const menuItems = [
   { title: "Home", url: "/dashboard", icon: Home },
-  { title: "Discover", url: "/dashboard/discover", icon: Compass },
+  { title: "Discover", url: "/discover", icon: Compass },
   { title: "Albums", url: "/dashboard/albums", icon: Disc },
   { title: "Artists", url: "/dashboard/artists", icon: Users },
 ];
