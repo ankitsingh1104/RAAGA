@@ -1,7 +1,8 @@
-import { ArrowLeft, Heart, MoreHorizontal, Play } from "lucide-react";
+import { ArrowLeft, Heart, MoreHorizontal, Play, Pause } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useMusicPlayer } from "@/contexts/MusicPlayerContext";
 
 import album1 from "@/assets/album-1.jpg";
 import album2 from "@/assets/album-2.jpg";
@@ -41,9 +42,34 @@ const trendingSongs = [
 
 const Discover = () => {
   const navigate = useNavigate();
+  const { playTrack, currentTrack, isPlaying, toggle } = useMusicPlayer();
+
+  const playlist = trendingSongs.map((s) => ({
+    id: s.id,
+    title: s.title,
+    artist: s.artist,
+    cover: s.cover,
+  }));
+
+  const handlePlayAll = () => {
+    if (playlist.length > 0) {
+      playTrack(playlist[0], playlist);
+    }
+  };
+
+  const handleRowClick = (song: typeof trendingSongs[0]) => {
+    if (currentTrack?.id === song.id) {
+      toggle();
+    } else {
+      playTrack(
+        { id: song.id, title: song.title, artist: song.artist, cover: song.cover },
+        playlist
+      );
+    }
+  };
 
   return (
-    <div className="flex-1 bg-gradient-to-b from-[#1a1a2e] via-background to-background min-h-screen">
+    <div className="flex-1 bg-gradient-to-b from-secondary via-background to-background min-h-screen pb-24">
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4">
         <Button
@@ -74,8 +100,8 @@ const Discover = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-br from-primary/40 to-transparent" />
           <div className="absolute top-4 left-4">
-            <p className="text-xs font-bold text-white uppercase tracking-wider">TRENDING</p>
-            <p className="text-lg font-bold text-white">MUSIC</p>
+            <p className="text-xs font-bold text-foreground uppercase tracking-wider">TRENDING</p>
+            <p className="text-lg font-bold text-foreground">MUSIC</p>
           </div>
         </div>
         <div className="flex-1">
@@ -95,6 +121,7 @@ const Discover = () => {
             <Button
               size="icon"
               className="w-12 h-12 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground"
+              onClick={handlePlayAll}
             >
               <Play className="h-5 w-5 ml-0.5" fill="currentColor" />
             </Button>
@@ -115,46 +142,65 @@ const Discover = () => {
 
         <ScrollArea className="h-[calc(100vh-420px)]">
           <div className="divide-y divide-border/20">
-            {trendingSongs.map((song) => (
-              <div
-                key={song.id}
-                className="grid grid-cols-[40px_1fr_150px_1fr_80px_40px] gap-4 py-3 items-center hover:bg-secondary/20 transition-colors group cursor-pointer"
-              >
-                <span className="text-primary font-bold">{song.rank}</span>
-                <div className="flex items-center gap-3">
-                  <img
-                    src={song.cover}
-                    alt={song.title}
-                    className="w-10 h-10 rounded object-cover"
-                  />
-                  <div>
-                    <h4 className="font-medium text-sm text-foreground">{song.title}</h4>
-                    <p className="text-xs text-muted-foreground">{song.artist}</p>
-                  </div>
-                </div>
-                <span className="text-sm text-muted-foreground">{song.releaseDate}</span>
-                <span className="text-sm text-muted-foreground truncate">{song.album}</span>
-                <div className="flex items-center justify-end gap-2">
-                  <Heart
-                    className={`h-4 w-4 ${song.liked ? "fill-primary text-primary" : "text-muted-foreground hover:text-primary"} transition-colors cursor-pointer`}
-                  />
-                  <span className="text-sm text-muted-foreground">{song.duration}</span>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
+            {trendingSongs.map((song) => {
+              const isCurrentSong = currentTrack?.id === song.id;
+              const isThisPlaying = isCurrentSong && isPlaying;
+
+              return (
+                <div
+                  key={song.id}
+                  className={`grid grid-cols-[40px_1fr_150px_1fr_80px_40px] gap-4 py-3 items-center hover:bg-secondary/20 transition-colors group cursor-pointer ${isCurrentSong ? 'bg-secondary/30' : ''}`}
+                  onClick={() => handleRowClick(song)}
                 >
-                  <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
-                </Button>
-              </div>
-            ))}
+                  <div className="relative w-6 h-6 flex items-center justify-center">
+                    <span className={`text-primary font-bold ${isCurrentSong ? 'opacity-0' : 'group-hover:opacity-0'}`}>
+                      {song.rank}
+                    </span>
+                    <div className={`absolute inset-0 flex items-center justify-center ${isCurrentSong ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                      {isThisPlaying ? (
+                        <Pause className="h-4 w-4 text-primary" fill="currentColor" />
+                      ) : (
+                        <Play className="h-4 w-4 text-primary" fill="currentColor" />
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={song.cover}
+                      alt={song.title}
+                      className="w-10 h-10 rounded object-cover"
+                    />
+                    <div>
+                      <h4 className={`font-medium text-sm ${isCurrentSong ? 'text-primary' : 'text-foreground'}`}>{song.title}</h4>
+                      <p className="text-xs text-muted-foreground">{song.artist}</p>
+                    </div>
+                  </div>
+                  <span className="text-sm text-muted-foreground">{song.releaseDate}</span>
+                  <span className="text-sm text-muted-foreground truncate">{song.album}</span>
+                  <div className="flex items-center justify-end gap-2">
+                    <Heart
+                      className={`h-4 w-4 ${song.liked ? "fill-primary text-primary" : "text-muted-foreground hover:text-primary"} transition-colors cursor-pointer`}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <span className="text-sm text-muted-foreground">{song.duration}</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                  </Button>
+                </div>
+              );
+            })}
           </div>
         </ScrollArea>
       </div>
 
       {/* Footer */}
-      <div className="absolute bottom-6 right-6 flex flex-col items-end gap-4">
+      <div className="absolute bottom-24 right-6 flex flex-col items-end gap-4">
         <h2 className="text-2xl font-bold text-foreground/80 tracking-wider">Raaga</h2>
         <div className="flex items-center gap-4 text-muted-foreground">
           <span className="cursor-pointer hover:text-foreground transition-colors">📱</span>
