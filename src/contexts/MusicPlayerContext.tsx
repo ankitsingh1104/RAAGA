@@ -1,12 +1,17 @@
 import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from "react";
 
+// Jamendo API configuration
+const JAMENDO_CLIENT_ID = "d4a4b8f5";
+const JAMENDO_API_BASE = "https://api.jamendo.com/v3.0";
+
 export interface Track {
   id: number;
   title: string;
   artist: string;
   cover: string;
-  previewUrl?: string;
+  audioUrl?: string;
   duration?: number;
+  album?: string;
 }
 
 interface MusicPlayerContextType {
@@ -71,19 +76,22 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
     };
   }, []);
 
-  const fetchDeezerPreview = async (title: string, artist: string): Promise<string | null> => {
+  const fetchJamendoTrack = async (title: string, artist: string): Promise<{ audioUrl: string; cover: string } | null> => {
     try {
       const query = encodeURIComponent(`${title} ${artist}`);
       const response = await fetch(
-        `https://corsproxy.io/?${encodeURIComponent(`https://api.deezer.com/search?q=${query}&limit=1`)}`
+        `${JAMENDO_API_BASE}/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=1&search=${query}`
       );
       const data = await response.json();
-      if (data.data && data.data.length > 0) {
-        return data.data[0].preview;
+      if (data.results && data.results.length > 0) {
+        return {
+          audioUrl: data.results[0].audio,
+          cover: data.results[0].album_image || data.results[0].image,
+        };
       }
       return null;
     } catch (error) {
-      console.error("Error fetching Deezer preview:", error);
+      console.error("Error fetching Jamendo track:", error);
       return null;
     }
   };
@@ -96,20 +104,26 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
       setQueueState(playlist);
     }
 
-    // Fetch preview URL if not present
-    let previewUrl = track.previewUrl;
-    if (!previewUrl) {
-      previewUrl = await fetchDeezerPreview(track.title, track.artist);
+    // Use existing audioUrl or fetch from Jamendo
+    let audioUrl = track.audioUrl;
+    let cover = track.cover;
+    
+    if (!audioUrl) {
+      const jamendoData = await fetchJamendoTrack(track.title, track.artist);
+      if (jamendoData) {
+        audioUrl = jamendoData.audioUrl;
+        cover = jamendoData.cover || track.cover;
+      }
     }
 
-    if (!previewUrl) {
-      console.error("No preview available for this track");
+    if (!audioUrl) {
+      console.error("No audio available for this track");
       return;
     }
 
-    const trackWithPreview = { ...track, previewUrl };
-    setCurrentTrack(trackWithPreview);
-    audioRef.current.src = previewUrl;
+    const trackWithAudio = { ...track, audioUrl, cover };
+    setCurrentTrack(trackWithAudio);
+    audioRef.current.src = audioUrl;
     audioRef.current.play();
     setIsPlaying(true);
   }, []);
@@ -119,7 +133,7 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
     
     if (track) {
       playTrack(track);
-    } else if (currentTrack?.previewUrl) {
+    } else if (currentTrack?.audioUrl) {
       audioRef.current.play();
       setIsPlaying(true);
     }
