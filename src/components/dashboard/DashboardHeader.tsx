@@ -3,7 +3,7 @@ import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useJamendoSearch } from "@/hooks/useJamendoSearch";
+import { useHybridSearch } from "@/hooks/useHybridSearch";
 import { SearchResults } from "@/components/search/SearchResults";
 import { useDebounce } from "@/hooks/useDebounce";
 
@@ -11,7 +11,7 @@ export function DashboardHeader() {
   const [query, setQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const debouncedQuery = useDebounce(query, 400);
-  const { results, isLoading, error, searchTracks, clearResults } = useJamendoSearch();
+  const { results, isLoading, error, source, searchTracks, clearResults } = useHybridSearch();
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,7 +48,7 @@ export function DashboardHeader() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
         <Input
           type="search"
-          placeholder="Search songs, artists on Jamendo..."
+          placeholder="Search songs, artists..."
           className="pl-10 pr-10 bg-secondary/50 border-border/50 focus:border-primary"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -68,6 +68,11 @@ export function DashboardHeader() {
         {/* Search Results Dropdown */}
         {showResults && (query || results.length > 0) && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-lg shadow-xl z-50 p-4">
+            {source && results.length > 0 && (
+              <p className="text-xs text-muted-foreground mb-2">
+                Results from <span className="font-medium capitalize">{source}</span>
+              </p>
+            )}
             <SearchResults
               results={results}
               isLoading={isLoading}

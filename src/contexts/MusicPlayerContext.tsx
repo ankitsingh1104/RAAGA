@@ -12,6 +12,8 @@ export interface Track {
   audioUrl?: string;
   duration?: number;
   album?: string;
+  youtubeId?: string;
+  source?: "jamendo" | "youtube";
 }
 
 interface MusicPlayerContextType {
@@ -21,6 +23,7 @@ interface MusicPlayerContextType {
   duration: number;
   volume: number;
   queue: Track[];
+  youtubeVideoId: string | null;
   play: (track?: Track) => void;
   pause: () => void;
   toggle: () => void;
@@ -31,6 +34,8 @@ interface MusicPlayerContextType {
   addToQueue: (track: Track) => void;
   setQueue: (tracks: Track[]) => void;
   playTrack: (track: Track, playlist?: Track[]) => void;
+  updateProgress: (currentTime: number, totalDuration: number) => void;
+  handleYouTubeEnded: () => void;
 }
 
 const MusicPlayerContext = createContext<MusicPlayerContextType | undefined>(undefined);
@@ -43,6 +48,7 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
   const [duration, setDuration] = useState(0);
   const [volume, setVolumeState] = useState(0.7);
   const [queue, setQueueState] = useState<Track[]>([]);
+  const [youtubeVideoId, setYoutubeVideoId] = useState<string | null>(null);
 
   // Initialize audio element
   useEffect(() => {
@@ -76,6 +82,16 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
     };
   }, []);
 
+  const updateProgress = useCallback((currentTime: number, totalDuration: number) => {
+    setProgress(currentTime);
+    setDuration(totalDuration);
+  }, []);
+
+  const handleYouTubeEnded = useCallback(() => {
+    setIsPlaying(false);
+    next();
+  }, []);
+
   const fetchJamendoTrack = async (title: string, artist: string): Promise<{ audioUrl: string; cover: string } | null> => {
     try {
       const query = encodeURIComponent(`${title} ${artist}`);
@@ -97,14 +113,30 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
   };
 
   const playTrack = useCallback(async (track: Track, playlist?: Track[]) => {
-    if (!audioRef.current) return;
-
     // Set queue if provided
     if (playlist) {
       setQueueState(playlist);
     }
 
-    // Use existing audioUrl or fetch from Jamendo
+    // Stop current audio if playing
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+
+    // Reset YouTube
+    setYoutubeVideoId(null);
+
+    // Handle YouTube track
+    if (track.youtubeId || track.source === "youtube") {
+      setCurrentTrack(track);
+      setYoutubeVideoId(track.youtubeId || null);
+      setIsPlaying(true);
+      setProgress(0);
+      return;
+    }
+
+    // Handle Jamendo track
     let audioUrl = track.audioUrl;
     let cover = track.cover;
     
@@ -121,29 +153,37 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
       return;
     }
 
-    const trackWithAudio = { ...track, audioUrl, cover };
+    const trackWithAudio = { ...track, audioUrl, cover, source: "jamendo" as const };
     setCurrentTrack(trackWithAudio);
-    audioRef.current.src = audioUrl;
-    audioRef.current.play();
+    
+    if (audioRef.current) {
+      audioRef.current.src = audioUrl;
+      audioRef.current.play();
+    }
     setIsPlaying(true);
   }, []);
 
   const play = useCallback((track?: Track) => {
-    if (!audioRef.current) return;
-    
     if (track) {
       playTrack(track);
-    } else if (currentTrack?.audioUrl) {
-      audioRef.current.play();
-      setIsPlaying(true);
+    } else if (currentTrack) {
+      if (currentTrack.source === "youtube" && youtubeVideoId) {
+        setIsPlaying(true);
+      } else if (audioRef.current && currentTrack.audioUrl) {
+        audioRef.current.play();
+        setIsPlaying(true);
+      }
     }
-  }, [currentTrack, playTrack]);
+  }, [currentTrack, youtubeVideoId, playTrack]);
 
   const pause = useCallback(() => {
-    if (!audioRef.current) return;
-    audioRef.current.pause();
-    setIsPlaying(false);
-  }, []);
+    if (currentTrack?.source === "youtube") {
+      setIsPlaying(false);
+    } else if (audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+  }, [currentTrack]);
 
   const toggle = useCallback(() => {
     if (isPlaying) {
@@ -154,14 +194,19 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
   }, [isPlaying, pause, play]);
 
   const seek = useCallback((time: number) => {
-    if (!audioRef.current) return;
-    audioRef.current.currentTime = time;
-    setProgress(time);
-  }, []);
+    if (currentTrack?.source === "youtube") {
+      // YouTube seeking is handled by the YouTubePlayer component via ref
+      setProgress(time);
+    } else if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setProgress(time);
+    }
+  }, [currentTrack]);
 
   const setVolume = useCallback((newVolume: number) => {
-    if (!audioRef.current) return;
-    audioRef.current.volume = newVolume;
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume;
+    }
     setVolumeState(newVolume);
   }, []);
 
@@ -198,6 +243,7 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
         duration,
         volume,
         queue,
+        youtubeVideoId,
         play,
         pause,
         toggle,
@@ -208,6 +254,8 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
         addToQueue,
         setQueue,
         playTrack,
+        updateProgress,
+        handleYouTubeEnded,
       }}
     >
       {children}
