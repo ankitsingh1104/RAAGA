@@ -11,7 +11,15 @@ export function DashboardHeader() {
   const [query, setQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const debouncedQuery = useDebounce(query, 400);
-  const { results, isLoading, error, source, searchTracks, clearResults } = useHybridSearch();
+  const { 
+    jamendoResults, 
+    youtubeResults, 
+    jamendoLoading, 
+    youtubeLoading, 
+    error, 
+    searchTracks, 
+    clearResults 
+  } = useHybridSearch();
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -42,6 +50,9 @@ export function DashboardHeader() {
     setShowResults(false);
   };
 
+  const hasResults = jamendoResults.length > 0 || youtubeResults.length > 0;
+  const isLoading = jamendoLoading || youtubeLoading;
+
   return (
     <header className="flex items-center justify-between gap-4 px-6 py-4">
       <div ref={searchContainerRef} className="relative flex-1 max-w-xl">
@@ -52,7 +63,7 @@ export function DashboardHeader() {
           className="pl-10 pr-10 bg-secondary/50 border-border/50 focus:border-primary"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => results.length > 0 && setShowResults(true)}
+          onFocus={() => (hasResults || isLoading) && setShowResults(true)}
         />
         {query && (
           <Button
@@ -66,20 +77,17 @@ export function DashboardHeader() {
         )}
 
         {/* Search Results Dropdown */}
-        {showResults && (query || results.length > 0) && (
+        {showResults && (query || hasResults || isLoading) && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-lg shadow-xl z-50 p-4">
-            {source && results.length > 0 && (
-              <p className="text-xs text-muted-foreground mb-2">
-                Results from <span className="font-medium capitalize">{source}</span>
-              </p>
-            )}
             <SearchResults
-              results={results}
-              isLoading={isLoading}
+              jamendoResults={jamendoResults}
+              youtubeResults={youtubeResults}
+              jamendoLoading={jamendoLoading}
+              youtubeLoading={youtubeLoading}
               error={error}
               onClose={() => setShowResults(false)}
             />
-            {!isLoading && results.length === 0 && query && (
+            {!isLoading && !hasResults && query && (
               <p className="text-center text-muted-foreground py-4">
                 No results found for "{query}"
               </p>
