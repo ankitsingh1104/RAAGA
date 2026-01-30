@@ -25,7 +25,7 @@ export function SearchResults({ results, isLoading, error, onClose }: SearchResu
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-3 text-muted-foreground">Searching Jamendo...</span>
+        <span className="ml-3 text-muted-foreground">Searching...</span>
       </div>
     );
   }
@@ -51,6 +51,7 @@ export function SearchResults({ results, isLoading, error, onClose }: SearchResu
         {results.map((track) => {
           const isCurrentTrack = currentTrack?.id === track.id;
           const isThisPlaying = isCurrentTrack && isPlaying;
+          const isYouTube = track.source === "youtube";
 
           return (
             <div
@@ -92,13 +93,16 @@ export function SearchResults({ results, isLoading, error, onClose }: SearchResu
                 </p>
               </div>
 
-              {track.album && (
-                <span className="text-xs text-muted-foreground truncate max-w-[120px] hidden md:block">
-                  {track.album}
-                </span>
-              )}
+              <span className={cn(
+                "text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0",
+                isYouTube 
+                  ? "bg-red-500/20 text-red-400" 
+                  : "bg-primary/20 text-primary"
+              )}>
+                {isYouTube ? "YouTube" : "Jamendo"}
+              </span>
 
-              {track.duration && (
+              {track.duration && !isYouTube && (
                 <span className="text-xs text-muted-foreground w-12 text-right">
                   {Math.floor(track.duration / 60)}:{(track.duration % 60).toString().padStart(2, "0")}
                 </span>

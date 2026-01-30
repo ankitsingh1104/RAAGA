@@ -23,10 +23,10 @@ export function useJamendoSearch() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const searchTracks = useCallback(async (query: string) => {
+  const searchTracks = useCallback(async (query: string): Promise<Track[]> => {
     if (!query.trim()) {
       setResults([]);
-      return;
+      return [];
     }
 
     setIsLoading(true);
@@ -52,13 +52,16 @@ export function useJamendoSearch() {
         cover: track.album_image || "/placeholder.svg",
         audioUrl: track.audio,
         duration: track.duration,
+        source: "jamendo" as const,
       }));
 
       setResults(tracks);
+      return tracks;
     } catch (err) {
       console.error("Search error:", err);
       setError(err instanceof Error ? err.message : "Search failed");
       setResults([]);
+      return [];
     } finally {
       setIsLoading(false);
     }
