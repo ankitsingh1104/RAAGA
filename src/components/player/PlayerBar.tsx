@@ -4,7 +4,6 @@ import { useMusicPlayer } from "@/contexts/MusicPlayerContext";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { YouTubePlayer, YouTubePlayerHandle } from "./YouTubePlayer";
-import { cn } from "@/lib/utils";
 
 function formatTime(seconds: number): string {
   if (isNaN(seconds)) return "0:00";
@@ -33,7 +32,7 @@ export function PlayerBar() {
   const youtubeRef = useRef<YouTubePlayerHandle>(null);
 
   const handleSeek = (value: number) => {
-    if (currentTrack?.source === "youtube" && youtubeRef.current) {
+    if (youtubeRef.current) {
       youtubeRef.current.seekTo(value);
     }
     seek(value);
@@ -42,8 +41,6 @@ export function PlayerBar() {
   if (!currentTrack) {
     return null;
   }
-
-  const isYouTube = currentTrack.source === "youtube";
 
   return (
     <>
@@ -75,14 +72,6 @@ export function PlayerBar() {
               <p className="text-xs text-muted-foreground truncate">
                 {currentTrack.artist}
               </p>
-              <span className={cn(
-                "text-[10px] font-medium px-1.5 py-0.5 rounded",
-                isYouTube 
-                  ? "bg-red-500/20 text-red-400" 
-                  : "bg-primary/20 text-primary"
-              )}>
-                {isYouTube ? "YouTube • Video" : "Jamendo • Audio"}
-              </span>
             </div>
           </div>
 
@@ -139,13 +128,13 @@ export function PlayerBar() {
               </span>
               <Slider
                 value={[progress]}
-                max={duration || 30}
+                max={duration || 100}
                 step={0.1}
                 onValueChange={([value]) => handleSeek(value)}
                 className="flex-1 cursor-pointer"
               />
               <span className="text-xs text-muted-foreground w-10">
-                {formatTime(duration || 30)}
+                {formatTime(duration)}
               </span>
             </div>
           </div>
