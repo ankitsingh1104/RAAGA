@@ -4,10 +4,8 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface SearchResultsProps {
-  jamendoResults: Track[];
-  youtubeResults: Track[];
-  jamendoLoading: boolean;
-  youtubeLoading: boolean;
+  results: Track[];
+  isLoading: boolean;
   error: string | null;
   onClose?: () => void;
 }
@@ -20,7 +18,6 @@ function TrackSkeleton() {
         <Skeleton className="h-4 w-3/4" />
         <Skeleton className="h-3 w-1/2" />
       </div>
-      <Skeleton className="h-5 w-16 rounded" />
     </div>
   );
 }
@@ -37,7 +34,6 @@ function TrackItem({
   const { playTrack, currentTrack, isPlaying, toggle } = useMusicPlayer();
   const isCurrentTrack = currentTrack?.id === track.id;
   const isThisPlaying = isCurrentTrack && isPlaying;
-  const isYouTube = track.source === "youtube";
 
   const handlePlayClick = () => {
     if (isCurrentTrack) {
@@ -86,37 +82,16 @@ function TrackItem({
           {track.artist}
         </p>
       </div>
-
-      <span className={cn(
-        "text-[10px] font-medium px-1.5 py-0.5 rounded flex-shrink-0",
-        isYouTube 
-          ? "bg-red-500/20 text-red-400" 
-          : "bg-primary/20 text-primary"
-      )}>
-        {isYouTube ? "YouTube" : "Jamendo"}
-      </span>
-
-      {track.duration && !isYouTube && (
-        <span className="text-xs text-muted-foreground w-12 text-right">
-          {Math.floor(track.duration / 60)}:{(track.duration % 60).toString().padStart(2, "0")}
-        </span>
-      )}
     </div>
   );
 }
 
 export function SearchResults({ 
-  jamendoResults, 
-  youtubeResults, 
-  jamendoLoading, 
-  youtubeLoading, 
+  results, 
+  isLoading, 
   error, 
   onClose 
 }: SearchResultsProps) {
-  const allTracks = [...jamendoResults, ...youtubeResults];
-  const hasResults = jamendoResults.length > 0 || youtubeResults.length > 0;
-  const isLoading = jamendoLoading || youtubeLoading;
-
   if (error) {
     return (
       <div className="py-8 text-center text-destructive">
@@ -125,67 +100,30 @@ export function SearchResults({
     );
   }
 
-  if (!hasResults && !isLoading) {
+  if (!results.length && !isLoading) {
     return null;
   }
 
   return (
-    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
-      {/* Jamendo Section */}
-      <div>
-        <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
-          <span className="text-primary">Jamendo</span>
-          {jamendoLoading && <span className="text-xs text-muted-foreground">(loading...)</span>}
-        </h3>
-        <div className="grid gap-2">
-          {jamendoLoading ? (
-            <>
-              <TrackSkeleton />
-              <TrackSkeleton />
-              <TrackSkeleton />
-            </>
-          ) : jamendoResults.length > 0 ? (
-            jamendoResults.map((track) => (
-              <TrackItem 
-                key={track.id} 
-                track={track} 
-                allTracks={allTracks}
-                onClose={onClose} 
-              />
-            ))
-          ) : (
-            <p className="text-xs text-muted-foreground py-2">No Jamendo results</p>
-          )}
-        </div>
-      </div>
-
-      {/* YouTube Section */}
-      <div>
-        <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
-          <span className="text-red-400">YouTube</span>
-          {youtubeLoading && <span className="text-xs text-muted-foreground">(loading...)</span>}
-        </h3>
-        <div className="grid gap-2">
-          {youtubeLoading ? (
-            <>
-              <TrackSkeleton />
-              <TrackSkeleton />
-              <TrackSkeleton />
-            </>
-          ) : youtubeResults.length > 0 ? (
-            youtubeResults.map((track) => (
-              <TrackItem 
-                key={track.id} 
-                track={track} 
-                allTracks={allTracks}
-                onClose={onClose} 
-              />
-            ))
-          ) : (
-            <p className="text-xs text-muted-foreground py-2">No YouTube results</p>
-          )}
-        </div>
-      </div>
+    <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
+      {isLoading ? (
+        <>
+          <TrackSkeleton />
+          <TrackSkeleton />
+          <TrackSkeleton />
+          <TrackSkeleton />
+          <TrackSkeleton />
+        </>
+      ) : (
+        results.map((track) => (
+          <TrackItem 
+            key={track.id} 
+            track={track} 
+            allTracks={results}
+            onClose={onClose} 
+          />
+        ))
+      )}
     </div>
   );
 }

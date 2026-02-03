@@ -3,7 +3,7 @@ import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useHybridSearch } from "@/hooks/useHybridSearch";
+import { useYouTubeSearch } from "@/hooks/useYouTubeSearch";
 import { SearchResults } from "@/components/search/SearchResults";
 import { useDebounce } from "@/hooks/useDebounce";
 
@@ -11,15 +11,7 @@ export function DashboardHeader() {
   const [query, setQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const debouncedQuery = useDebounce(query, 400);
-  const { 
-    jamendoResults, 
-    youtubeResults, 
-    jamendoLoading, 
-    youtubeLoading, 
-    error, 
-    searchTracks, 
-    clearResults 
-  } = useHybridSearch();
+  const { results, isLoading, error, searchTracks, clearResults } = useYouTubeSearch();
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,9 +42,6 @@ export function DashboardHeader() {
     setShowResults(false);
   };
 
-  const hasResults = jamendoResults.length > 0 || youtubeResults.length > 0;
-  const isLoading = jamendoLoading || youtubeLoading;
-
   return (
     <header className="flex items-center justify-between gap-4 px-6 py-4">
       <div ref={searchContainerRef} className="relative flex-1 max-w-xl">
@@ -63,7 +52,7 @@ export function DashboardHeader() {
           className="pl-10 pr-10 bg-secondary/50 border-border/50 focus:border-primary"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => (hasResults || isLoading) && setShowResults(true)}
+          onFocus={() => (results.length > 0 || isLoading) && setShowResults(true)}
         />
         {query && (
           <Button
@@ -77,17 +66,15 @@ export function DashboardHeader() {
         )}
 
         {/* Search Results Dropdown */}
-        {showResults && (query || hasResults || isLoading) && (
+        {showResults && (query || results.length > 0 || isLoading) && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-lg shadow-xl z-50 p-4">
             <SearchResults
-              jamendoResults={jamendoResults}
-              youtubeResults={youtubeResults}
-              jamendoLoading={jamendoLoading}
-              youtubeLoading={youtubeLoading}
+              results={results}
+              isLoading={isLoading}
               error={error}
               onClose={() => setShowResults(false)}
             />
-            {!isLoading && !hasResults && query && (
+            {!isLoading && results.length === 0 && query && (
               <p className="text-center text-muted-foreground py-4">
                 No results found for "{query}"
               </p>
