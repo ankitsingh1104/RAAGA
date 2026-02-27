@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
+import { recordPlay } from "@/lib/listeningHistory";
 
 export interface Track {
   id: number;
@@ -78,6 +79,11 @@ export function MusicPlayerProvider({ children }: { children: React.ReactNode })
     setYoutubeVideoId(track.youtubeId || null);
     setIsPlaying(true);
     setProgress(0);
+
+    // Record play for AI recommendations
+    if (track.youtubeId) {
+      recordPlay(track.youtubeId, track.title, track.artist);
+    }
   }, []);
 
   const play = useCallback((track?: Track) => {
