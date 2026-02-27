@@ -8,6 +8,7 @@ import { FavoritesMixCard } from "@/components/discover/FavoritesMixCard";
 import { FeaturedSongCard } from "@/components/discover/FeaturedSongCard";
 import { LikedSongsCard } from "@/components/discover/LikedSongsCard";
 import { RecentlyPlayedTable } from "@/components/discover/RecentlyPlayedTable";
+import { RecommendedSection } from "@/components/discover/RecommendedSection";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Discover = () => {
@@ -83,6 +84,9 @@ const Discover = () => {
                 </div>
               </div>
               
+              {/* AI Recommended Section */}
+              <RecommendedSection />
+
               {/* Recently Played section */}
               <RecentlyPlayedTable 
                 tracks={recentlyPlayed} 
