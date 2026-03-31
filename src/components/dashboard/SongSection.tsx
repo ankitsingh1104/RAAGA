@@ -1,25 +1,18 @@
-import { Plus, Play, Pause } from "lucide-react";
+import { Play, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useMusicPlayer } from "@/contexts/MusicPlayerContext";
-
-interface Song {
-  id: number;
-  title: string;
-  artist: string;
-  cover: string;
-}
+import { useMusicPlayer, Track } from "@/contexts/MusicPlayerContext";
 
 interface SongSectionProps {
   title: string;
   highlightedWord: string;
-  songs: Song[];
+  songs: Track[];
 }
 
 export function SongSection({ title, highlightedWord, songs }: SongSectionProps) {
   const titleParts = title.split(highlightedWord);
   const { playTrack, currentTrack, isPlaying, toggle } = useMusicPlayer();
 
-  const handlePlayClick = (song: Song, e: React.MouseEvent) => {
+  const handlePlayClick = (song: Track, e: React.MouseEvent) => {
     e.stopPropagation();
     if (currentTrack?.id === song.id) {
       toggle();
@@ -36,10 +29,6 @@ export function SongSection({ title, highlightedWord, songs }: SongSectionProps)
           <span className="text-primary">{highlightedWord}</span>
           {titleParts[1] || ""}
         </h3>
-        <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
-          <Plus className="h-4 w-4 mr-2" />
-          View All
-        </Button>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
