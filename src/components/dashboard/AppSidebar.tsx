@@ -1,30 +1,13 @@
 import { NavLink } from "@/components/NavLink";
 import { useNavigate } from "react-router-dom";
 import {
-  Home,
-  Compass,
-  Disc,
-  Users,
-  Clock,
-  Star,
-  Heart,
-  ListMusic,
-  PlusCircle,
-  Settings,
-  LogOut,
+  Home, Compass, Disc, Users, Clock, Star, Heart, ListMusic, PlusCircle, Settings, LogOut,
 } from "lucide-react";
 import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarFooter,
+  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
+  SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter,
 } from "@/components/ui/sidebar";
+import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 const menuItems = [
@@ -48,12 +31,11 @@ const playlistItems = [
 export function AppSidebar() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
+    logout();
+    toast({ title: "Logged out", description: "You have been successfully logged out." });
     navigate("/");
   };
 
@@ -66,22 +48,14 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* Menu Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-primary text-xs font-medium px-4">
-            Menu
-          </SidebarGroupLabel>
+          <SidebarGroupLabel className="text-primary text-xs font-medium px-4">Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/dashboard"}
-                      className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-                      activeClassName="bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
-                    >
+                    <NavLink to={item.url} end={item.url === "/dashboard"} className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors" activeClassName="bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground">
                       <item.icon className="h-5 w-5" />
                       <span>{item.title}</span>
                     </NavLink>
@@ -92,21 +66,14 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Library Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-primary text-xs font-medium px-4">
-            Library
-          </SidebarGroupLabel>
+          <SidebarGroupLabel className="text-primary text-xs font-medium px-4">Library</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {libraryItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-                      activeClassName="bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
-                    >
+                    <NavLink to={item.url} className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors" activeClassName="bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground">
                       <item.icon className="h-5 w-5" />
                       <span>{item.title}</span>
                     </NavLink>
@@ -117,25 +84,14 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Playlist Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-primary text-xs font-medium px-4">
-            Playlist and Favorite
-          </SidebarGroupLabel>
+          <SidebarGroupLabel className="text-primary text-xs font-medium px-4">Playlist and Favorite</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {playlistItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${
-                        item.accent
-                          ? "text-primary hover:text-primary hover:bg-primary/10"
-                          : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                      }`}
-                      activeClassName="bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
-                    >
+                    <NavLink to={item.url} className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors ${item.accent ? "text-primary hover:text-primary hover:bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"}`} activeClassName="bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground">
                       <item.icon className="h-5 w-5" />
                       <span>{item.title}</span>
                     </NavLink>
@@ -146,22 +102,15 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* General Section */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-primary text-xs font-medium px-4">
-            General
-          </SidebarGroupLabel>
+          <SidebarGroupLabel className="text-primary text-xs font-medium px-4">General</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <NavLink
-                    to="/dashboard/settings"
-                    className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors"
-                    activeClassName="bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground"
-                  >
+                  <NavLink to="/dashboard/settings" className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors" activeClassName="bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground">
                     <Settings className="h-5 w-5" />
-                    <span>Setting</span>
+                    <span>Settings</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -171,10 +120,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4">
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-primary hover:bg-primary/10 transition-colors w-full"
-        >
+        <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-primary hover:bg-primary/10 transition-colors w-full">
           <LogOut className="h-5 w-5" />
           <span>Logout</span>
         </button>
