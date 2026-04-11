@@ -1,73 +1,98 @@
-# Welcome to your Lovable project
+# 🎧 Raaga – AI-Powered Music Streaming Web App
 
-## Project info
+Raaga is a modern, responsive, AI-enhanced music streaming web application built using a frontend-only architecture. It allows users to search, play, and discover music seamlessly with a clean UI and intelligent recommendations.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+---
 
-## How can I edit this code?
+## 🚀 Features
 
-There are several ways of editing your application.
+### 🎵 Core Music Features
+- 🔍 Search songs using YouTube Data API
+- ▶️ Play / Pause / Seek music using YouTube IFrame Player
+- 🎧 Global music player (persistent across pages)
+- 📀 Discover and Albums pages
+- 🧭 Smooth navigation with SPA (Single Page Application)
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### 🤖 AI-Based Recommendations
+- Tracks user listening behavior
+- Stores play history in localStorage
+- Detects time of day (morning / evening / night)
+- Suggests songs based on:
+  - Preferred genres
+  - Listening patterns
+  - Time-based mood
+- Dynamic **“Recommended For You”** section
 
-Changes made via Lovable will be committed automatically to this repo.
+---
 
-**Use your preferred IDE**
+### 📂 Library Features
+- ❤️ Favorite songs
+- 🕒 Recently played songs
+- 🔥 Most played songs
+- 📁 Create and manage playlists
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 👤 User Features
+- 🔐 Login system with validation
+- Password must be minimum 8 characters
+- Session stored using localStorage
+- Logout functionality
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### 🎨 UI/UX Features
+- Dark theme with orange accent
+- Fully responsive design
+- Figma-based UI implementation
+- Smooth transitions and hover effects
+- Sidebar navigation with active highlighting
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 🏗️ Tech Stack
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+### Frontend
+- React.js (or Lovable-generated framework)
+- HTML5 / CSS3 / JavaScript
+- React Router (SPA navigation)
 
-**Edit a file directly in GitHub**
+### APIs
+- YouTube Data API v3 (search)
+- YouTube IFrame Player API (playback)
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Storage
+- localStorage (for:
+  - user session
+  - play history
+  - favorites
+  - playlists)
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## ⚙️ Architecture
+- SPA-based routing (no page reloads)
+- Single global player instance
+- Centralized state for playback
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+## 🧠 AI Recommendation Logic
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The recommendation system is based on:
 
-## How can I deploy this project?
+1. **User Behavior Tracking**
+   - Tracks songs played
+   - Stores timestamps
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+2. **Genre Preference Detection**
+   - Counts frequency of genres
 
-## Can I connect a custom domain to my Lovable project?
+3. **Time-Based Filtering**
+   - Morning → Energetic songs
+   - Evening → Chill music
+   - Night → Lo-fi / soft tracks
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+4. **Scoring System**
